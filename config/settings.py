@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +33,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +45,23 @@ INSTALLED_APPS = [
     'apps.auths',
     'apps.blog',
 ]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],  # <-- обязательно для переопределения admin/index.html
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -100,6 +122,134 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+UNFOLD = {
+    "SITE_TITLE": "Blog Admin",
+    "SITE_HEADER": "Blog Platform",
+    "SITE_SUBHEADER": "Content & Community Management",
+    "SITE_SYMBOL": "Menu_book",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "ENVIRONMENT": "apps.blog.callbacks.environment_callback",
+    "DASHBOARD_CALLBACK": "apps.blog.callbacks.dashboard_callback",
+    # Палитра Emerald из Tailwind CSS (не дефолтный фиолетовый)
+    "COLORS": {
+        "primary": {
+            "50": "236 253 245",
+            "100": "209 250 229",
+            "200": "167 243 208",
+            "300": "110 231 183",
+            "400": "52 211 153",
+            "500": "16 185 129",
+            "600": "5 150 105",
+            "700": "4 120 87",
+            "800": "6 95 70",
+            "900": "6 78 59",
+            "950": "2 44 34",
+        },
+    },
+    "SITE_DROPDOWN": [
+        {
+            "icon": "code",
+            "title": _("GitHub Repository"),
+            "link": "https://github.com/your-username/your-repo",
+        },
+        {
+            "icon": "menu_book",
+            "title": _("Unfold Documentation"),
+            "link": "https://unfoldadmin.com/docs/",
+        },
+    ],
+    "COMMAND": {
+        "search_models": True,
+        "show_history": True,
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": _("Overview"),
+                "separator": False,
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("Content"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Posts"),
+                        "icon": "article",
+                        "link": reverse_lazy("admin:blog_post_changelist"),
+                        "badge": "apps.blog.callbacks.drafts_badge_callback",
+                    },
+                    {
+                        "title": _("Comments"),
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:blog_comment_changelist"),
+                    },
+                    {
+                        "title": _("Categories"),
+                        "icon": "folder",
+                        "link": reverse_lazy("admin:blog_category_changelist"),
+                    },
+                    {
+                        "title": _("Tags"),
+                        "icon": "label",
+                        "link": reverse_lazy("admin:blog_tag_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Users & Access"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Users"),
+                        "icon": "person",
+                        # Если модель User лежит в приложении users -> admin:users_user_changelist
+                        # Если в приложении blog -> admin:blog_user_changelist
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": _("Groups"),
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+        ],
+    },
+    "TABS": [
+        {
+            "models": [
+                "blog.post",
+            ],
+            "items": [
+                {
+                    "title": _("All"),
+                    "link": reverse_lazy("admin:blog_post_changelist"),
+                },
+                {
+                    "title": _("Published"),
+                    "link": lambda request: f"{reverse_lazy('admin:blog_post_changelist')}?status__exact=published",
+                },
+                {
+                    "title": _("Drafts"),
+                    "link": lambda request: f"{reverse_lazy('admin:blog_post_changelist')}?status__exact=draft",
+                },
+            ],
+        },
+    ],
+}
 
 
 # Internationalization
