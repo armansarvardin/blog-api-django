@@ -1,0 +1,46 @@
+# Django specific files
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Environments and Secrets
+.env
+.secrets/
+env/
+venv/
+.venv/
+ENV/
+
+# Python packaging and distributions
+*.egg-info/
+.installed.cfg
+*.egg
+build/
+dist/
+wheels/
+*.spec
+
+# Testing and coverage
+htmlcov/
+.tox/
+.coverage
+.cache
+.pytest_cache/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmproj
+*.tmproject
+
+# Operating System files
+.DS_Store
+Thumbs.db
